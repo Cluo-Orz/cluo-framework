@@ -21,15 +21,15 @@ import java.util.*;
  */
 public class JpaSpecificationBuilder {
 
-    public <T> Specification<T> search() {
+    public <T> Specification<T> search(Object queryEntity) {
         Map<String, Join<Object, Object>> joinNames = new HashMap<>();
         Map<Integer, Predicate> predicateMap = new HashMap<>();
         Map<Integer, Predicate> predicateMapAndRelation = new HashMap<>();
         List<Order> orders = new ArrayList<>();
         return (root, query, cb) -> {
-            Map<String, String> kFieldVMethod = ReflectUtil.getKFieldVGetMethod(this);
+            Map<String, String> kFieldVMethod = ReflectUtil.getKFieldVGetMethod(queryEntity);
             List<Predicate> l = new ArrayList<>();
-            for (Class aClass = this.getClass(); aClass != Object.class; aClass = aClass.getSuperclass()) {
+            for (Class aClass = queryEntity.getClass(); aClass != Object.class; aClass = aClass.getSuperclass()) {
                 // 判断属性内容是否有效
                 Field[] fields = aClass.getDeclaredFields();
                 for (int i = 0; i < fields.length; i++) {
@@ -39,7 +39,7 @@ public class JpaSpecificationBuilder {
                         if (field.isAnnotationPresent(SearchBy.class) && field.isAnnotationPresent(SearchBy.class)) {
                             Method method = ReflectUtil.getMethod(aClass, kFieldVMethod.get(field.getName()), 0);
                             if (method != null) {
-                                Object filedValue = method.invoke(this);
+                                Object filedValue = method.invoke(queryEntity);
                                 boolean isEmpty = true;
                                 if (filedValue instanceof String) {
                                     if (((String) filedValue).length() > 0) {
