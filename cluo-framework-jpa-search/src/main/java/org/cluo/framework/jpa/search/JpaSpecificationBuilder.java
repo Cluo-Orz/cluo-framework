@@ -21,7 +21,7 @@ import java.util.*;
  */
 public class JpaSpecificationBuilder {
 
-    public <T> Specification<T> search(Object queryEntity) {
+    public static <T> Specification<T> search(Object queryEntity) {
         Map<String, Join<Object, Object>> joinNames = new HashMap<>();
         Map<Integer, Predicate> predicateMap = new HashMap<>();
         Map<Integer, Predicate> predicateMapAndRelation = new HashMap<>();
