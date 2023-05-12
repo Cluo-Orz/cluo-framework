@@ -13,6 +13,7 @@
         <module>cluo-framework-reflection</module>
         <module>cluo-framework-http</module>
         <module>cluo-framework-image-scale</module>
+        <module>cluo-framework-qr-code</module>
     </modules>
 
     <properties>
