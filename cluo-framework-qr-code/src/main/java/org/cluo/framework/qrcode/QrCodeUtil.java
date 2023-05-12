@@ -1,4 +1,4 @@
-package org.cluo.framework;
+package org.cluo.framework.qrcode;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
