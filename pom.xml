@@ -14,21 +14,48 @@
         <module>cluo-framework-http</module>
         <module>cluo-framework-image-scale</module>
         <module>cluo-framework-qr-code</module>
+        <module>cluo-framework-sdk-wechat-mp-login</module>
+        <module>cluo-framework-sdk-all</module>
+        <module>cluo-framework-json</module>
+        <module>cluo-framework-xml</module>
     </modules>
 
     <properties>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.cluo.framework</groupId>
+                <artifactId>cluo-framework-http</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.cluo.framework</groupId>
+                <artifactId>cluo-framework-image-scale</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.cluo.framework</groupId>
                 <artifactId>cluo-framework-jpa-search</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.cluo.framework</groupId>
+                <artifactId>cluo-framework-json</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.cluo.framework</groupId>
+                <artifactId>cluo-framework-qr-code</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -39,10 +66,29 @@
             </dependency>
 
             <dependency>
+                <groupId>org.cluo.framework</groupId>
+                <artifactId>cluo-framework-sdk-all</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.cluo.framework</groupId>
+                <artifactId>cluo-framework-sdk-wechat-mp-login</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.cluo.framework</groupId>
+                <artifactId>cluo-framework-xml</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+
+            <dependency>
                 <!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.1.1.RELEASE</version>
+                <version>2.7.11</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
