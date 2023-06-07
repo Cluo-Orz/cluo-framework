@@ -61,7 +61,6 @@ public class ThirdLoginService {
     }
 
     public MiniUserInfoResponse miniCheck(MiniCheckRequest request,String appid,String secret)  {
-        logger.error("mini:request>>>"+request);
         // 登录状态失效 【想方设法】获取unionid
         Assert.notNull(request, "参数不为空");
         // 通过检查登录状态接口获取unionid
@@ -88,8 +87,8 @@ public class ThirdLoginService {
             String userSecretInfo = null;
             try {
                 userSecretInfo = decryptUtil.decrypt(request.getAuth().getEncryptedData(), report.getSession_key(), request.getAuth().getIv());
-                logger.error("userSecretInfo>>>"+userSecretInfo);
             } catch (Exception e) {
+                logger.error("entryptedData: {}, session_key: {}, iv: {} ", request.getAuth().getEncryptedData(), report.getSession_key(), request.getAuth().getIv());
                 throw new WechatException("Secret", e);
             }
             if (userSecretInfo == null) {

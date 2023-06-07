@@ -18,6 +18,8 @@
         <module>cluo-framework-sdk-all</module>
         <module>cluo-framework-json</module>
         <module>cluo-framework-xml</module>
+        <module>cluo-framework-light-weight-file-system</module>
+        <module>cluo-framework-trace</module>
     </modules>
 
     <properties>

@@ -9,6 +9,8 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.cluo.framework.http.Method;
 import org.cluo.framework.json.JSONUtil;
 import org.cluo.framework.sdk.all.tencent.api.live.LiveEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -20,6 +22,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.*;
 import java.util.zip.DataFormatException;
@@ -729,42 +732,7 @@ public class TencentUtil {
 	 * descriotion 描述
 	 */
 	public static class DecryptUtil {
-		// 算法名称
-		final String KEY_ALGORITHM = "AES";
-
-		// 加解密算法/模式/填充方式
-		final String algorithmStr = "AES/CBC/PKCS7Padding";
-		//
-		private Key key;
-		private Cipher cipher;
-
-		public void init(byte[] keyBytes) {
-
-			// 如果密钥不足16位，那么就补足. 这个if 中的内容很重要
-			int base = 16;
-			if (keyBytes.length % base != 0) {
-				int groups = keyBytes.length / base + (keyBytes.length % base != 0 ? 1 : 0);
-				byte[] temp = new byte[groups * base];
-				Arrays.fill(temp, (byte) 0);
-				System.arraycopy(keyBytes, 0, temp, 0, keyBytes.length);
-				keyBytes = temp;
-			}
-			// 初始化
-			Security.addProvider(new BouncyCastleProvider());
-			// 转化成JAVA的密钥格式
-			key = new SecretKeySpec(keyBytes, KEY_ALGORITHM);
-			try {
-				// 初始化cipher
-				cipher = Cipher.getInstance(algorithmStr);
-			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchPaddingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
+        private static Logger log = LoggerFactory.getLogger(DecryptUtil.class);
 		/**
 		 * 解密方法
          * @param ivStr ivStr
@@ -774,26 +742,40 @@ public class TencentUtil {
 		 * @return 字符串
 		 */
 		public String decrypt(String encryptedDataStr, String keyBytesStr, String ivStr) throws Exception {
-			byte[] encryptedText = null;
-			byte[] encryptedData = null;
-			byte[] sessionkey = null;
-			byte[] iv = null;
+            String result = "";
+            // 被加密的数据
+            byte[] dataByte = Base64.getDecoder().decode(encryptedDataStr);
+            // 加密秘钥
+            byte[] keyByte = Base64.getDecoder().decode(keyBytesStr);
+            // 偏移量
+            byte[] ivByte = Base64.getDecoder().decode(ivStr);
+            // 如果密钥不足16位，那么就补足. 这个if 中的内容很重要
+            int base = 16;
+            if (keyByte.length % base != 0) {
+                int groups = keyByte.length / base
+                        + (keyByte.length % base != 0 ? 1 : 0);
+                byte[] temp = new byte[groups * base];
+                Arrays.fill(temp, (byte) 0);
+                System.arraycopy(keyByte, 0, temp, 0, keyByte.length);
+                keyByte = temp;
+            }
+            SecretKeySpec secretKeySpec = new SecretKeySpec(keyByte, "AES");
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(ivByte);
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
 
-			sessionkey = Base64.getDecoder().decode(keyBytesStr);
-			encryptedData = Base64.getDecoder().decode(encryptedDataStr);
-			iv = Base64.getDecoder().decode(ivStr);
-
-			init(sessionkey);
-
-			cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
-			encryptedText = cipher.doFinal(encryptedData);
-			return new String(encryptedText, "utf-8");
+            byte[] decryptedData = cipher.doFinal(dataByte);
+            return new String(decryptedData, StandardCharsets.UTF_8);
 		}
 
 		public static void main(String[] args) throws Exception {
+            Security.addProvider(new BouncyCastleProvider());
 			DecryptUtil decryptUtil = new DecryptUtil();
-			System.out.println(decryptUtil.decrypt("ses+MkzCtG2AJfdTIXcKCIlDxIY4i6npw0frutzgJJDi8bwmqVV80TzQU3TIwUamx5QORGmYd8UkeJCefj8LzfoZS9Pnu/YdMgwu64eU8zUGp0B36DAeqWgclgN2o/ViONiYm5NKAm7VlgVJCjF5rE3p/iWO7TGGp0yj1nX2M2R40ECU32L/HnfQyz8EfaT8bicgNrRLijcqWHAW2ougmUzmrxG3z/b+cFBglcjaX/mplDDSW/hZaXbZWkKgU4tJ3lyeiLE10K4VwRZmvb3c77kYiXl37WV0n6wT260whLNtXCZqjqeSlE7fATdfNUlVV3uh4Mo7VinYd1WsUOsoSO9/nkvn1Uw0bkRgtbzGvNOyk06xQ72nMJdI8yfAX/fGQrsRwcI7wCpoQ889rQQN029ssRA0ZyfZYefFNGE0OrE4ivM8KP9UtWHrEW5KKHZWnou/dShDA1iTX9D141csKQ==",
-					"k7RTzh9dE3rqzT96MxdNlA==", "WXFw7pivWry9P14SRZ8XXw=="));
+            //entryptedData: , session_key: , iv:
+			System.out.println(decryptUtil.decrypt(
+                    "s61vXHGxMMG+wenIsl8dNltVNhf5c57+2MGmfX29IhpsG9/+9BOiXfcBx1BNfPbKk8kGB5QXMtxbFkHDNGu0Fiw9GewvnNVMX5/m2MHJPujfbBH8HqxZgvjuD/O/pjXqMwoiDJzlSdbvxvxL6m8phNzDT5aqOyoV652FFQ4XU+enPlXI5C0vEHi1t5yJdCYepRXKKL0UwWzc/AypC9uc/Q==",
+					"IEgYCZdHi3/mY7Y8jpmvLA==",
+                    "9pww/xXyqbNzL4jGeQuPrA=="));
 
 		}
 
